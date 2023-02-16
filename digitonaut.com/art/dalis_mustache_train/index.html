@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from digitonaut.com/art/dalis_mustache_train/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 16 Feb 2023 08:05:57 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head>
+<meta charset='utf-8'\>
+<meta name='description' content=''/>
+<meta name='apple-mobile-web-app-capable' content='yes'><meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'><title>Dali's Mustache Train</title>
+
+<script src="shader-web-background.min.js"></script>
+
+<script type="x-shader/x-fragment" id="Image">
+precision highp float;
+uniform vec2  iResolution;
+uniform float iTime;
+
+// -------------------------------------------------------------------------------------------------- Paste your Shadertoy code here:
+////////////////////////////////////////////////////////////////////////////////
+//"The train along Dali's mustache" - Shader Showdown practice session 008
+
+// WHAT THE FUCK IS THE SHADER SHOWDOWN?
+// The "Shader Showdown" is a demoscene live-coding shader battle competition.
+// 2 coders battle for 25 minutes making a shader from memory on stage. 
+// The audience votes for the winner by making noise or by voting on their phone.
+// Winner goes through to the next round until the final where champion is crowned.
+// Live coding shader software used is BONZOMATIC made by Gargaj from Conspiracy:
+// https://github.com/Gargaj/Bonzomatic
+
+// Every tuesdays around 20:30 UK time I practise live on TWITCH.
+// This is the result of session 008. 
+
+// COME SEE LIVE CODING EVERY TUESDAYS HERE: https://www.twitch.tv/evvvvil_
+
+// evvvvil / DESiRE demogroup
+
+// "The only difference between me and a madman is that I am not mad." - Salvador Dali
+
+vec2 sc,e=vec2(.00035,-.00035);float t,tt,at,st;vec3 np,ro,bp;//Some fucking globals, about as exciting as a wet piece of cardboard
+float bo(vec3 p,vec3 r){vec3 q=abs(p)-r;return max(max(q.x,q.y),q.z);}//box function stolen from UNC because IQ was busy eating tapas
+vec2 fb( vec3 p ) //fucking bit function creates a piece and then we clone and tweak it in the mp map function. Just like boredom and veganism: they are related.
+{//Sort of a train track broski, this isn't "Southwest" trains, so it will arrive on time, despite the driver being drunk
+
+  vec2 h,t=vec2(bo(abs(p)-vec3(2,0,0),vec3(.4,.4,3)),5);//this creates two rectangle cloned out with symetry along x axis, 
+  h=vec2(1000,3);//setup next shape to be huge numbrer so we can directly mix in new shapes
+  for(int i=0;i<4;i++){//in da loop we keep cloning rectangles along the z to create inner rectangles on the train tracks
+    h.x=min(h.x,bo(abs(p)-vec3(0,0,0.85*float(i)),vec3(2,0.15,0.15)));//adding ractanlges, because the tracks you leave are more important than correct fcuking spellling
+  }
+  t.x=min(t.x,0.7*bo(p,vec3(15,0.2+at*.1,0.2+at*.1)));//long horizontal box that gets spread out by attractor(at), "Oi mate, fancy moving along yeah? You fucking prancer"
+  t=(t.x<h.x)?t:h;//Mixes t-blue bits and h-black bits with material ID. Blends geometries but should not be confused with an actual blender as it does not care for juicing diets pseudo-science.
+  t.x*=0.6;//this increases the definition so we don't get artifacts, becuase the influence is Dali, not your nephew shitty drawings that you are forced to leave on the fridge.
+  return t;
+}
+
+float noise(vec3 p){//Noise function stolen from Virgil who stole it from Shane who I assume understands this shit, unlike me who is far too busy trading pokemon cards
+  vec3 ip=floor(p),s=vec3(7,157,113);
+  p-=ip;
+  vec4 h=vec4(0,s.yz,s.y+s.z)+dot(ip,s);
+  p=p*p*(3.-2.*p);
+  h=mix(fract(sin(h)*43758.5),fract(sin(h+s.x)*43758.5),p.x);
+  h.xy=mix(h.xz,h.yw,p.y);
+  return mix(h.x,h.y,p.z);//Ah, yes I understand this bit: it draws a shape which, if you are drunk enough, looks like a penis
+}
+
+
+vec2 fc( vec3 p )//This function is dumb as fuck it creates a hollow rectangle, which looks like a painting frame
+{//Something sort of Dali about it especially with the noise on the outside edges, i assume he would have wanted to rub his mustache against it
+float noi=noise(p);//Add a bit of noise to the edge of the frame to make it more Dali-esque
+vec2 t=vec2(bo(p,vec3(12.+noi,12.+noi,1)),6);//Create a dumb fucking rectangle wide, tall, but thin, bit like as if I folded your annoying uncle
+t.x=max(t.x,-bo(p,vec3(10,10,2)));//This digs a fucking hole in the above rectangle making it into a frame/hollow rectangle
+t.x*=0.5;//this increases the definition so we don't get artifacts. Mustache grooming, because hipsters didnt invent anything
+  return t;
+}
+mat2 r2(float r){return mat2(cos(r),sin(r),-sin(r),cos(r));}//simple rotate function, it is useful as fuck and short. Bit like a flexible midget
+
+vec2 mp( vec3 p ) //This is the main MAP function where all geometry is made/defined. It's centre stage broski, unlike you trying to make a best man speech at your ex's wedding.
+{
+  p.xy*=r2((p.z-ro.z)*st*0.1);//st is switchtwist and as it says on the fucking tin: it twists along z
+  np=bp=p;//We create new positions np and bp which we will modulo, tweak, push rotate and then pass to the fucking bit function
+  np.z=mod(np.z+tt*10.,6.)-3.;//first mod makes inifinite z axis and move towards you, "The train arriving at La Ciota" aint't got nothing on us mother fucker.
+  bp.z=mod(bp.z+tt*20.,60.)-30.;//this double modulo will push attractor close to you and again into infitnity
+  at=max(0.,(6.-(length(bp)-6.)));//This create the attractor (reverse attractor) which pushes and rotates the geometry apart to reveal it
+  for(int i=0;i<2;i++){//In da loop, sort of, pretty fuckign weak though i mean loop running twice, that ain't a loop it's a small-time recuring offender
+   np=abs(np)-vec3(0.3*at,0.5*at,0);//this clones the train track along the x and y axis only happens to geometry within radius of attractor
+   np.xy*=r2(at*0.1);//this rotates the traintracks along xy axis only happens to geometry within radius of attractor 
+   np.xz*=r2(at*0.1);//this rotates the traintracks along xz axis only happens to geometry within radius of attractor
+   np.xz*=r2(sin(bp.z*0.1)*st*.5);//This twists/rotates the train track every so often along the xz axis to make it less boring
+  }
+  vec2 h,t=fb(np);//Passing the new position to fucking bit function to create more complex geometry, 
+  h=vec2(0.3*length(abs(np)-vec3(4,at,1))-0.2*at,6);//This creates spheres which are snug to the blue/black geometry it reuses np again but with 1 more abs symstery cloning
+  t=(t.x<h.x)?t:h;//This is classic line to mix two shapes together while retaining their material ids and idividual colors
+  np.xy*=r2(.785);//this rotates np 45 degree so that the white frames are like triangular arches rather than square.
+  h=fc(np);//This create the outter frame with the fc function (the comments in this function are more entertaining than the function itself so go on, have a gander)
+  t=(t.x<h.x)?t:h;//This is classic line to mix two shapes together while retaining their individual colors.
+  t.x=max(t.x,-0.5*(length(p-ro)-2.));//Simple trick with sphere around camera to remove any geometry colliding. "1:Personal space. 2:Personal space. 3:Stay away from my personal space"
+  return t;
+}
+
+vec2 tr( vec3 ro,vec3 rd )//Main raymarching function with material ID flex, because heckling during your children's school play is always funny.
+{
+vec2 h,t=vec2(0.1);//0.1 is our near plane
+    for(int i=0;i<128;i++){
+        h=mp(ro+rd*t.x);//get result of running map function at this ray pos
+        if(h.x<.0001||t.x>50.) break;//Get out early if we hit geom (<precision which is 0.0001) or we hit far plane (t.x>50)
+        t.x+=h.x;t.y=h.y;//t.y=h.y passes the material ID
+    }
+    if(t.x>50.) t.x=0.;//Exit early optimizes, because just like me, your GPU needs a drink sometimes, or 7!
+    return t;//always return this return that, you're a fucking broken record you know that?
+}
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    vec2 uv = vec2(gl_FragCoord.x / iResolution.x, gl_FragCoord.y / iResolution.y);
+    uv -= 0.5;
+    uv /= vec2(iResolution.y / iResolution.x, 1);
+    tt=mod(iTime*0.5,100.);//My time variable which everything uses to animate. This is modulo to avoid ugly artifact.
+
+    ro=vec3(0,2,-19);//Ro=ray origin=camera position 
+    st=clamp(cos(tt),0.,1.);//St=switch twist is an animation variable which defines if we are twitsting the whole scene along z axis or not
+    vec3 rd=normalize(vec3(uv,0.5)),co,fo,//ro=ray direction (where the camera is pointing), co=final color, fo=fog color
+    ld=normalize(mix(vec3(0.5,.2,-.1),vec3(0.3,0.5,-.5),st));//light direction, because god likes to point finger with dramatic effect
+    co=fo=vec3(0.9)*(1.-(length(uv)-0.2));//By default the color fog color and it's a light coloured vignette
+
+    sc=tr(ro,rd);t=sc.x;//This is where we shoot the fucking rays to get the scene, like God playing fetch with them fucking angels again
+
+    if(t>0.){//If t>0 then we must have hit some geometry so let's shade it.
+    //We hit some geometry so let's get the current position (po) and build some normals (no). You do the Maths while I hang out with Socrates, corrupting the youth
+    vec3 po=ro+rd*t,no=normalize(e.xyy*mp(po+e.xyy).x+e.yyx*mp(po+e.yyx).x+e.yxy*mp(po+e.yxy).x+e.xxx*mp(po+e.xxx).x),
+        
+    //LIGHTING MICRO ENGINE BROSKI 
+    al=max(vec3(0,.8,1)-at*0.2,0.);//al=albedo this is the base colour defined by material id, by default it's blue with gradient depending on the sphere attractor
+    no*=(1.+0.6*ceil(cos(np*2.)));no=normalize(no);//This normals trick shift the normals and creates details sort of like metal plaque 
+    if(sc.y<5.) al=vec3(0);//This says ok different material id so im gonna make this shape black...
+    if(sc.y>5.) al=vec3(1);//or white. Simple and sweet, like the village idiot covered in sugar.
+
+    float dif=max(0.,dot(no,ld)),//dif=diffuse becuase I ain't got time to cook torrance
+    aor=t/50.,ao=exp2(-2.*pow(max(0.,1.-mp(po+no*aor).x/aor),2.)),//ao = ambient occlusion, aor = ambient occlusion range
+    //spo=specular power, THIS TRICK is some fucking sweet gloss map generated from recursive noise function. Fuck yeah broski!
+    spo=exp2(1.+3.*noise(np/vec3(0.4,.8,.8)+noise(np/vec3(0.1,.2,.2)))),
+    fr=pow(1.+dot(no,rd),4.);//Fresnel blends the geometry in the background with some sort of gradient edge reflection mother fucker
+    vec3 sss=vec3(0.5)*smoothstep(0.,1.,mp(po+ld*0.4).x/0.4),//Fake sub surface fucking scattering, from tekf, big up tekf! https://www.shadertoy.com/view/lslXRj
+    sp=vec3(0.5)*pow(max(dot(reflect(-ld,no),-rd),0.),spo);//specular by shane. Even better than rubbing your cheeks against frozen barbed-wire
+
+    co=mix(sp+al*(0.8*ao+0.2)*(dif+sss),fo,min(fr,0.2));//Final lighting result: taking it all in, and then crushing it into an RGB shit sandwich
+    co=mix(co,fo,1.-exp(-.00006*t*t*t));//Adding some nice fog, feels nice like when you manage to put your socks on in one seamless gesture. What a beautiful world we live in the west.
+    }
+    vec3 allIWantedForChristmasWasBrexitButAllIGotWasThisLousyGermanSausage=co;
+    fragColor = vec4(pow(allIWantedForChristmasWasBrexitButAllIGotWasThisLousyGermanSausage,vec3(0.45)),1);
+}
+
+// -------------------------------------------------------------------------------------------------- End of Shadertoy code
+
+
+void main() {
+mainImage(gl_FragColor, gl_FragCoord.xy);
+}
+</script>
+<script>
+shaderWebBackground.shade({
+	shaders: {
+		Image: {
+			uniforms: {
+				iResolution: (gl, loc, ctx) => gl.uniform2f(loc, ctx.width, ctx.height),
+				iTime: (gl, loc) => gl.uniform1f(loc, performance.now() / 1000)
+			}
+		}
+	}
+});
+</script>
+</head>
+<body>
+</body>
+
+<!-- Mirrored from digitonaut.com/art/dalis_mustache_train/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 16 Feb 2023 08:05:58 GMT -->
+</html>

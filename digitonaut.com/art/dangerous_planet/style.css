@@ -1,0 +1,17 @@
+body{
+  margin:0;
+  overflow:hidden;
+  background-color:#000;
+}
+canvas{
+  background-color:#000;
+}
+a{
+  position:absolute;
+  bottom:20px;
+  right:20px;
+  color:#fff;
+  text-decoration:none;
+  font-family:Arial;
+  font-size:10px;
+}

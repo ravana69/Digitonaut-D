@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Mirrored from digitonaut.com/art/deep_in_the_wood/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 16 Feb 2023 08:06:42 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head>
+<meta charset='utf-8'\>
+<meta name='apple-mobile-web-app-capable' content='yes'><meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'><title>Deep In The Wood</title>
+
+<link type="text/css" rel="stylesheet" href="main.css">
+</head>
+<body>
+
+<script id="vs" type="not-js">
+void main()	{
+  gl_Position = vec4( position, 1.0 );
+}
+</script>
+<script id="fs" type="not-js">
+precision mediump float;
+
+// -------------------------------------------- code from https://glslsandbox.com/ ------------------
+// Deep in the Woods
+
+#extension GL_OES_standard_derivatives : enable
+
+precision highp float;
+
+uniform float time;
+uniform vec2 mouse,resolution;
+#define rot(a) mat2(cos(a), sin(a), -sin(a), cos(a))
+const float TAU = atan(1.0) * 8.0;
+#define A(u,w) 	k=length(p.xy);p.x=k*(mod(atan(p.y,p.x),TAU/u)-TAU/u/2.);p.y=k-w		
+#define B(u,w) 	k=length(p.yz);p.y=k*(mod(atan(p.z,p.y),TAU/u)-TAU/u/2.);p.z=k-w		
+#define C(u,w) 	k=length(p.yz);p.y=k*abs(sin(atan(p.z,p.y))-.5)*TAU/u;p.z=k-w		
+
+vec3 map(vec3 p, float u, float v) {
+	float k;
+	p.xy *= rot(u);
+	p.yz *= rot(v);
+		
+	A(10.,0.);   // 0 here makes a sphere, easier to control color according to p
+	B(12.,10.);
+	A(10.,2.7); //A(18.,.7); 
+	C(12.,10.0);
+	A(10.,2.7); 
+	B(12.,-5.7);
+	A(10.,1.97); // 1.97+.05*cos(p.z*20.-time*8.)
+	B(12.,10.5);
+	A(16.,2.7); //10,2.7
+	B(12.,-10.);
+	A(10.,2.7); 
+	B(12.,10.);
+	
+	p.x = dot(abs(p), normalize(vec3(6.9,5,2.2))) - 1.6 ;
+	return p; 
+}
+
+void main( void ) {
+	vec2 uv = (gl_FragCoord.xy - 0.5 * resolution) / resolution.y;
+	vec3 rd = normalize(vec3(uv, 1));
+	float v=-8.*mod(time/66.,TAU), u=mouse.x+.25, c=.11; 
+	vec3 p = vec3(0, (45.+25.*mouse.y)*c+3., -5.25*c-3.); // +-171.+262.*mouse.y  <- y term
+	vec3 col = vec3(0);
+	for (float i = 1.; i < 160.; i++) {
+		vec3 d = map(p, u, v); 			
+		if (d.x < 0.001) {
+			//float x=max(0.,length(p)-11.7)*300.;
+			//gl_FragColor = vec4( 144.-x*20.,100.+x,80.-x*200.,100)/float(4*i*i);			
+			float x=max(0.,length(p)-12.)*400.;
+			col = vec3(144.-x,100.+x,80.-x)/(i*i);			
+			break;
+		}
+		p += rd * d.x;
+	}
+	gl_FragColor=vec4(col,1);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+</script>
+<script src="three.min.js"></script>
+<script src="main.js"></script>
+
+</body>
+
+<!-- Mirrored from digitonaut.com/art/deep_in_the_wood/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 16 Feb 2023 08:06:46 GMT -->
+</html>
